@@ -410,13 +410,13 @@ TEXTS = {
             "③ Tayyor! ZIP avtomatik yaratiladi.\n\n"
             "⏱ *40 soniya* ichida tugma bosilmasa — avtozip.\n\n"
             "📋 *Cheklovlar:*\n"
-            "• Max *{MAX_FILES} ta fayl* (bir ZIP uchun)\n"
+            "• Max *{max_files} ta fayl* (bir ZIP uchun)\n"
             "• Max *300 MB* umumiy hajm\n"
             "• Kuniga *3 ta ZIP*"
         ),
         "files_saved":  "✅ *{count} ta fayl* qabul qilindi!\n\n👇 ZIP yasash tugmasini bosing:",
         "receiving":    "📥 *{count} ta fayl qabul qilinmoqda...* kutib turing",
-        "max_files":    "⛔ *Fayl cheklovi!*\n\nBir ZIP uchun maksimal *{MAX_FILES} ta fayl*.\nHozirgi fayllarni avval ziplab oling.",
+        "max_files":    "⛔ *Fayl cheklovi!*\n\nBir ZIP uchun maksimal *{max_files} ta fayl*.\nHozirgi fayllarni avval ziplab oling.",
         "daily_limit":  "⛔ *Kunlik limit!*\n\nBugun *{limit} ta ZIP* limitingiz tugadi.\nErtaga yana foydalanishingiz mumkin! 😊",
         "join_required": "👋 Botdan foydalanish uchun\nquyidagi kanal(lar)ga obuna bo'ling:\n\n✅ Obuna bo'lgach «Tekshirish» tugmasini bosing.",
         "join_check_btn": "✅ Tekshirish",
@@ -500,13 +500,13 @@ TEXTS = {
             "③ Done! ZIP is created automatically.\n\n"
             "⏱ *Auto-zipped* after 40 seconds.\n\n"
             "📋 *Limits:*\n"
-            "• Max *{MAX_FILES} files* per ZIP\n"
+            "• Max *{max_files} files* per ZIP\n"
             "• Max *300 MB* total size\n"
             "• *3 ZIPs* per day"
         ),
         "files_saved":  "✅ *{count} file(s)* received!\n\n👇 Press Create ZIP when ready:",
         "receiving":    "📥 *Receiving {count} file(s)...* please wait",
-        "max_files":    "⛔ *File limit reached!*\n\nMaximum *{MAX_FILES} files* per ZIP.\nPlease ZIP current files first.",
+        "max_files":    "⛔ *File limit reached!*\n\nMaximum *{max_files} files* per ZIP.\nPlease ZIP current files first.",
         "daily_limit":  "⛔ *Daily limit reached!*\n\nYou've used *{limit} ZIPs* today.\nCome back tomorrow! 😊",
         "join_required": "👋 To use this bot, please join\nthe following channel(s):\n\n✅ After joining, press «Check» button.",
         "join_check_btn": "✅ Check",
@@ -575,7 +575,9 @@ TEXTS = {
 def tx(uid: int, key: str, **kw) -> str:
     lang = get_lang(uid) or "uz"
     text = TEXTS.get(lang, TEXTS["uz"]).get(key, key)
-    return text.format(**kw) if kw else text
+    if 'max_files' not in kw:
+        kw['max_files'] = MAX_FILES
+    return text.format(**kw)
 
 def main_keyboard(uid: int):
     lang = get_lang(uid) or "uz"
@@ -1104,7 +1106,7 @@ async def cb_set_lang(client, call):
     name = call.from_user.first_name or "Foydalanuvchi"
     sent = await client.send_message(
         call.message.chat.id,
-        TEXTS[lang]["welcome"].format(name=name),
+        tx(uid, "welcome", name=name),
         parse_mode=enums.ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup([[
             InlineKeyboardButton(TEXTS[lang]["change_lang"], callback_data="change_lang")
